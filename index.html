@@ -1,0 +1,4462 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ポケモン単語帳</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .card {
+      width: 200px;
+      height: 150px;
+      margin: 10px;
+      border: 2px solid #333;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: white;
+      cursor: pointer;
+      transition: transform 0.3s, border-color 0.3s;
+      perspective: 1000px;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+    }
+
+    .card:hover {
+      transform: scale(1.1);
+    }
+
+    .card.is-flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 10px;
+    }
+
+    .card-front {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .card-back {
+      background-color: #28a745;
+      color: white;
+      transform: rotateY(180deg);
+    }
+
+    .cards-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .active-card {
+      border-color: red; /* 直前に触ったカードの枠線の色 */
+    }
+  </style>
+</head>
+<body>
+
+  <h1>ポケモン単語帳</h1>
+  <div class="cards-container" id="cards-container"></div>
+
+  <script>
+    // ここに pokemon_data.json の内容を直接書き込みます
+    const pokemonData = [
+  {
+    "first_two_letters": "アー",
+    "matching_names": [
+      "アーケオス",
+      "アーケン",
+      "アーゴヨン",
+      "アーボ",
+      "アーボック",
+      "アーマーガア",
+      "アーマルド"
+    ]
+  },
+  {
+    "first_two_letters": "アイ",
+    "matching_names": [
+      "アイアント"
+    ]
+  },
+  {
+    "first_two_letters": "アオ",
+    "matching_names": [
+      "アオガラス"
+    ]
+  },
+  {
+    "first_two_letters": "アギ",
+    "matching_names": [
+      "アギルダー"
+    ]
+  },
+  {
+    "first_two_letters": "アク",
+    "matching_names": [
+      "アクジキング"
+    ]
+  },
+  {
+    "first_two_letters": "アグ",
+    "matching_names": [
+      "アグノム"
+    ]
+  },
+  {
+    "first_two_letters": "アゲ",
+    "matching_names": [
+      "アゲハント"
+    ]
+  },
+  {
+    "first_two_letters": "アゴ",
+    "matching_names": [
+      "アゴジムシ"
+    ]
+  },
+  {
+    "first_two_letters": "アサ",
+    "matching_names": [
+      "アサナン"
+    ]
+  },
+  {
+    "first_two_letters": "アシ",
+    "matching_names": [
+      "アシマリ",
+      "アシレーヌ"
+    ]
+  },
+  {
+    "first_two_letters": "アズ",
+    "matching_names": [
+      "アズマオウ"
+    ]
+  },
+  {
+    "first_two_letters": "アチ",
+    "matching_names": [
+      "アチゲータ",
+      "アチャモ"
+    ]
+  },
+  {
+    "first_two_letters": "アッ",
+    "matching_names": [
+      "アップリュー"
+    ]
+  },
+  {
+    "first_two_letters": "アノ",
+    "matching_names": [
+      "アノクサ",
+      "アノプス",
+      "アノホラグサ"
+    ]
+  },
+  {
+    "first_two_letters": "アバ",
+    "matching_names": [
+      "アバゴーラ"
+    ]
+  },
+  {
+    "first_two_letters": "アブ",
+    "matching_names": [
+      "アブソル",
+      "アブリー",
+      "アブリボン"
+    ]
+  },
+  {
+    "first_two_letters": "アマ",
+    "matching_names": [
+      "アマージョ",
+      "アマカジ",
+      "アママイコ",
+      "アマルス",
+      "アマルルガ"
+    ]
+  },
+  {
+    "first_two_letters": "アメ",
+    "matching_names": [
+      "アメタマ",
+      "アメモース"
+    ]
+  },
+  {
+    "first_two_letters": "アヤ",
+    "matching_names": [
+      "アヤシシ"
+    ]
+  },
+  {
+    "first_two_letters": "アラ",
+    "matching_names": [
+      "アラブルタケ"
+    ]
+  },
+  {
+    "first_two_letters": "アリ",
+    "matching_names": [
+      "アリアドス",
+      "アリゲイツ"
+    ]
+  },
+  {
+    "first_two_letters": "アル",
+    "matching_names": [
+      "アルクジラ",
+      "アルセウス"
+    ]
+  },
+  {
+    "first_two_letters": "アン",
+    "matching_names": [
+      "アンノーン"
+    ]
+  },
+  {
+    "first_two_letters": "イイ",
+    "matching_names": [
+      "イイネイヌ"
+    ]
+  },
+  {
+    "first_two_letters": "イー",
+    "matching_names": [
+      "イーブイ",
+      "イーユイ"
+    ]
+  },
+  {
+    "first_two_letters": "イエ",
+    "matching_names": [
+      "イエッサン"
+    ]
+  },
+  {
+    "first_two_letters": "イオ",
+    "matching_names": [
+      "イオルブ"
+    ]
+  },
+  {
+    "first_two_letters": "イキ",
+    "matching_names": [
+      "イキリンコ"
+    ]
+  },
+  {
+    "first_two_letters": "イシ",
+    "matching_names": [
+      "イシズマイ",
+      "イシツブテ",
+      "イシヘンジン"
+    ]
+  },
+  {
+    "first_two_letters": "イダ",
+    "matching_names": [
+      "イダイトウ",
+      "イダイナキバ"
+    ]
+  },
+  {
+    "first_two_letters": "イッ",
+    "matching_names": [
+      "イッカネズミ"
+    ]
+  },
+  {
+    "first_two_letters": "イト",
+    "matching_names": [
+      "イトマル"
+    ]
+  },
+  {
+    "first_two_letters": "イノ",
+    "matching_names": [
+      "イノムー"
+    ]
+  },
+  {
+    "first_two_letters": "イベ",
+    "matching_names": [
+      "イベルタル"
+    ]
+  },
+  {
+    "first_two_letters": "イル",
+    "matching_names": [
+      "イルカマン",
+      "イルミーゼ"
+    ]
+  },
+  {
+    "first_two_letters": "イワ",
+    "matching_names": [
+      "イワーク",
+      "イワパレス",
+      "イワンコ"
+    ]
+  },
+  {
+    "first_two_letters": "イン",
+    "matching_names": [
+      "インテレオン"
+    ]
+  },
+  {
+    "first_two_letters": "ウイ",
+    "matching_names": [
+      "ウインディ"
+    ]
+  },
+  {
+    "first_two_letters": "ウー",
+    "matching_names": [
+      "ウーラオス",
+      "ウールー"
+    ]
+  },
+  {
+    "first_two_letters": "ウェ",
+    "matching_names": [
+      "ウェーニバル",
+      "ウェルカモ"
+    ]
+  },
+  {
+    "first_two_letters": "ウォ",
+    "matching_names": [
+      "ウォーグル"
+    ]
+  },
+  {
+    "first_two_letters": "ウオ",
+    "matching_names": [
+      "ウオチルドン",
+      "ウオノラゴン"
+    ]
+  },
+  {
+    "first_two_letters": "ウガ",
+    "matching_names": [
+      "ウガツホムラ"
+    ]
+  },
+  {
+    "first_two_letters": "ウソ",
+    "matching_names": [
+      "ウソッキー",
+      "ウソハチ"
+    ]
+  },
+  {
+    "first_two_letters": "ウッ",
+    "matching_names": [
+      "ウッウ"
+    ]
+  },
+  {
+    "first_two_letters": "ウツ",
+    "matching_names": [
+      "ウツドン",
+      "ウツボット",
+      "ウツロイド"
+    ]
+  },
+  {
+    "first_two_letters": "ウデ",
+    "matching_names": [
+      "ウデッポウ"
+    ]
+  },
+  {
+    "first_two_letters": "ウネ",
+    "matching_names": [
+      "ウネルミナモ"
+    ]
+  },
+  {
+    "first_two_letters": "ウパ",
+    "matching_names": [
+      "ウパー"
+    ]
+  },
+  {
+    "first_two_letters": "ウミ",
+    "matching_names": [
+      "ウミディグダ",
+      "ウミトリオ"
+    ]
+  },
+  {
+    "first_two_letters": "ウリ",
+    "matching_names": [
+      "ウリムー"
+    ]
+  },
+  {
+    "first_two_letters": "ウル",
+    "matching_names": [
+      "ウルガモス"
+    ]
+  },
+  {
+    "first_two_letters": "エア",
+    "matching_names": [
+      "エアームド"
+    ]
+  },
+  {
+    "first_two_letters": "エイ",
+    "matching_names": [
+      "エイパム"
+    ]
+  },
+  {
+    "first_two_letters": "エー",
+    "matching_names": [
+      "エースバーン",
+      "エーフィ"
+    ]
+  },
+  {
+    "first_two_letters": "エク",
+    "matching_names": [
+      "エクスレッグ"
+    ]
+  },
+  {
+    "first_two_letters": "エテ",
+    "matching_names": [
+      "エテボース"
+    ]
+  },
+  {
+    "first_two_letters": "エネ",
+    "matching_names": [
+      "エネコ",
+      "エネコロロ"
+    ]
+  },
+  {
+    "first_two_letters": "エビ",
+    "matching_names": [
+      "エビワラー"
+    ]
+  },
+  {
+    "first_two_letters": "エム",
+    "matching_names": [
+      "エムリット"
+    ]
+  },
+  {
+    "first_two_letters": "エモ",
+    "matching_names": [
+      "エモンガ"
+    ]
+  },
+  {
+    "first_two_letters": "エリ",
+    "matching_names": [
+      "エリキテル"
+    ]
+  },
+  {
+    "first_two_letters": "エル",
+    "matching_names": [
+      "エルフーン",
+      "エルレイド"
+    ]
+  },
+  {
+    "first_two_letters": "エレ",
+    "matching_names": [
+      "エレキッド",
+      "エレキブル",
+      "エレザード",
+      "エレズン",
+      "エレブー"
+    ]
+  },
+  {
+    "first_two_letters": "エン",
+    "matching_names": [
+      "エンテイ",
+      "エンニュート",
+      "エンブオー",
+      "エンペルト"
+    ]
+  },
+  {
+    "first_two_letters": "オー",
+    "matching_names": [
+      "オーガポン",
+      "オーダイル",
+      "オーベム",
+      "オーロット",
+      "オーロンゲ"
+    ]
+  },
+  {
+    "first_two_letters": "オオ",
+    "matching_names": [
+      "オオスバメ",
+      "オオタチ",
+      "オオニューラ"
+    ]
+  },
+  {
+    "first_two_letters": "オク",
+    "matching_names": [
+      "オクタン"
+    ]
+  },
+  {
+    "first_two_letters": "オコ",
+    "matching_names": [
+      "オコリザル"
+    ]
+  },
+  {
+    "first_two_letters": "オシ",
+    "matching_names": [
+      "オシャマリ"
+    ]
+  },
+  {
+    "first_two_letters": "オタ",
+    "matching_names": [
+      "オタチ",
+      "オタマロ"
+    ]
+  },
+  {
+    "first_two_letters": "オド",
+    "matching_names": [
+      "オドシシ",
+      "オドリドリ"
+    ]
+  },
+  {
+    "first_two_letters": "オト",
+    "matching_names": [
+      "オトシドリ",
+      "オトスパス"
+    ]
+  },
+  {
+    "first_two_letters": "オニ",
+    "matching_names": [
+      "オニゴーリ",
+      "オニシズクモ",
+      "オニスズメ",
+      "オニドリル"
+    ]
+  },
+  {
+    "first_two_letters": "オノ",
+    "matching_names": [
+      "オノノクス",
+      "オノンド"
+    ]
+  },
+  {
+    "first_two_letters": "オム",
+    "matching_names": [
+      "オムスター",
+      "オムナイト"
+    ]
+  },
+  {
+    "first_two_letters": "オラ",
+    "matching_names": [
+      "オラチフ"
+    ]
+  },
+  {
+    "first_two_letters": "オリ",
+    "matching_names": [
+      "オリーヴァ",
+      "オリーニョ"
+    ]
+  },
+  {
+    "first_two_letters": "オン",
+    "matching_names": [
+      "オンバーン",
+      "オンバット"
+    ]
+  },
+  {
+    "first_two_letters": "ガー",
+    "matching_names": [
+      "ガーディ",
+      "ガーメイル"
+    ]
+  },
+  {
+    "first_two_letters": "カイ",
+    "matching_names": [
+      "カイオーガ",
+      "カイデン",
+      "カイリキー",
+      "カイリュー",
+      "カイロス"
+    ]
+  },
+  {
+    "first_two_letters": "カエ",
+    "matching_names": [
+      "カエンジシ"
+    ]
+  },
+  {
+    "first_two_letters": "ガオ",
+    "matching_names": [
+      "ガオガエン"
+    ]
+  },
+  {
+    "first_two_letters": "カク",
+    "matching_names": [
+      "カクレオン"
+    ]
+  },
+  {
+    "first_two_letters": "ガケ",
+    "matching_names": [
+      "ガケガニ"
+    ]
+  },
+  {
+    "first_two_letters": "カゲ",
+    "matching_names": [
+      "カゲボウズ"
+    ]
+  },
+  {
+    "first_two_letters": "カジ",
+    "matching_names": [
+      "カジッチュ",
+      "カジリガメ"
+    ]
+  },
+  {
+    "first_two_letters": "ガチ",
+    "matching_names": [
+      "ガチグマ",
+      "ガチゴラス"
+    ]
+  },
+  {
+    "first_two_letters": "カチ",
+    "matching_names": [
+      "カチコール"
+    ]
+  },
+  {
+    "first_two_letters": "カヌ",
+    "matching_names": [
+      "カヌチャン"
+    ]
+  },
+  {
+    "first_two_letters": "ガバ",
+    "matching_names": [
+      "ガバイト"
+    ]
+  },
+  {
+    "first_two_letters": "カバ",
+    "matching_names": [
+      "カバルドン"
+    ]
+  },
+  {
+    "first_two_letters": "カビ",
+    "matching_names": [
+      "カビゴン"
+    ]
+  },
+  {
+    "first_two_letters": "カプ",
+    "matching_names": [
+      "カプ・コケコ",
+      "カプ・テテフ",
+      "カプ・ブルル",
+      "カプ・レヒレ",
+      "カプサイジ"
+    ]
+  },
+  {
+    "first_two_letters": "カブ",
+    "matching_names": [
+      "カブト",
+      "カブトプス",
+      "カブルモ"
+    ]
+  },
+  {
+    "first_two_letters": "ガブ",
+    "matching_names": [
+      "ガブリアス"
+    ]
+  },
+  {
+    "first_two_letters": "カポ",
+    "matching_names": [
+      "カポエラー"
+    ]
+  },
+  {
+    "first_two_letters": "ガマ",
+    "matching_names": [
+      "ガマガル",
+      "ガマゲロゲ"
+    ]
+  },
+  {
+    "first_two_letters": "カマ",
+    "matching_names": [
+      "カマスジョー"
+    ]
+  },
+  {
+    "first_two_letters": "カミ",
+    "matching_names": [
+      "カミツオロチ",
+      "カミッチュ",
+      "カミツルギ"
+    ]
+  },
+  {
+    "first_two_letters": "カム",
+    "matching_names": [
+      "カムカメ"
+    ]
+  },
+  {
+    "first_two_letters": "カメ",
+    "matching_names": [
+      "カメール",
+      "カメックス",
+      "カメテテ"
+    ]
+  },
+  {
+    "first_two_letters": "ガメ",
+    "matching_names": [
+      "ガメノデス"
+    ]
+  },
+  {
+    "first_two_letters": "カモ",
+    "matching_names": [
+      "カモネギ"
+    ]
+  },
+  {
+    "first_two_letters": "カラ",
+    "matching_names": [
+      "カラカラ",
+      "カラサリス",
+      "カラナクシ",
+      "カラマネロ",
+      "カラミンゴ"
+    ]
+  },
+  {
+    "first_two_letters": "ガラ",
+    "matching_names": [
+      "ガラガラ"
+    ]
+  },
+  {
+    "first_two_letters": "カリ",
+    "matching_names": [
+      "カリキリ"
+    ]
+  },
+  {
+    "first_two_letters": "ガル",
+    "matching_names": [
+      "ガルーラ"
+    ]
+  },
+  {
+    "first_two_letters": "カル",
+    "matching_names": [
+      "カルボウ"
+    ]
+  },
+  {
+    "first_two_letters": "ガン",
+    "matching_names": [
+      "ガントル"
+    ]
+  },
+  {
+    "first_two_letters": "ギア",
+    "matching_names": [
+      "ギアル"
+    ]
+  },
+  {
+    "first_two_letters": "ギガ",
+    "matching_names": [
+      "ギガイアス"
+    ]
+  },
+  {
+    "first_two_letters": "ギギ",
+    "matching_names": [
+      "ギギアル",
+      "ギギギアル"
+    ]
+  },
+  {
+    "first_two_letters": "キチ",
+    "matching_names": [
+      "キチキギス"
+    ]
+  },
+  {
+    "first_two_letters": "キテ",
+    "matching_names": [
+      "キテルグマ"
+    ]
+  },
+  {
+    "first_two_letters": "キノ",
+    "matching_names": [
+      "キノガッサ",
+      "キノココ"
+    ]
+  },
+  {
+    "first_two_letters": "キバ",
+    "matching_names": [
+      "キバゴ",
+      "キバニア"
+    ]
+  },
+  {
+    "first_two_letters": "キマ",
+    "matching_names": [
+      "キマワリ"
+    ]
+  },
+  {
+    "first_two_letters": "ギモ",
+    "matching_names": [
+      "ギモー"
+    ]
+  },
+  {
+    "first_two_letters": "キモ",
+    "matching_names": [
+      "キモリ"
+    ]
+  },
+  {
+    "first_two_letters": "キャ",
+    "matching_names": [
+      "キャタピー",
+      "キャモメ"
+    ]
+  },
+  {
+    "first_two_letters": "ギャ",
+    "matching_names": [
+      "ギャラドス",
+      "ギャロップ"
+    ]
+  },
+  {
+    "first_two_letters": "キュ",
+    "matching_names": [
+      "キュウコン",
+      "キュレム",
+      "キュワワー"
+    ]
+  },
+  {
+    "first_two_letters": "キョ",
+    "matching_names": [
+      "キョジオーン"
+    ]
+  },
+  {
+    "first_two_letters": "キラ",
+    "matching_names": [
+      "キラーメ",
+      "キラフロル"
+    ]
+  },
+  {
+    "first_two_letters": "ギラ",
+    "matching_names": [
+      "ギラティナ"
+    ]
+  },
+  {
+    "first_two_letters": "キリ",
+    "matching_names": [
+      "キリキザン",
+      "キリンリキ"
+    ]
+  },
+  {
+    "first_two_letters": "ギル",
+    "matching_names": [
+      "ギルガルド"
+    ]
+  },
+  {
+    "first_two_letters": "キル",
+    "matching_names": [
+      "キルリア"
+    ]
+  },
+  {
+    "first_two_letters": "キレ",
+    "matching_names": [
+      "キレイハナ"
+    ]
+  },
+  {
+    "first_two_letters": "キン",
+    "matching_names": [
+      "キングドラ",
+      "キングラー"
+    ]
+  },
+  {
+    "first_two_letters": "クイ",
+    "matching_names": [
+      "クイタラン"
+    ]
+  },
+  {
+    "first_two_letters": "クエ",
+    "matching_names": [
+      "クエスパトラ"
+    ]
+  },
+  {
+    "first_two_letters": "クサ",
+    "matching_names": [
+      "クサイハナ"
+    ]
+  },
+  {
+    "first_two_letters": "クス",
+    "matching_names": [
+      "クスネ"
+    ]
+  },
+  {
+    "first_two_letters": "クズ",
+    "matching_names": [
+      "クズモー"
+    ]
+  },
+  {
+    "first_two_letters": "グソ",
+    "matching_names": [
+      "グソクムシャ"
+    ]
+  },
+  {
+    "first_two_letters": "クチ",
+    "matching_names": [
+      "クチート"
+    ]
+  },
+  {
+    "first_two_letters": "クヌ",
+    "matching_names": [
+      "クヌギダマ"
+    ]
+  },
+  {
+    "first_two_letters": "クマ",
+    "matching_names": [
+      "クマシュン"
+    ]
+  },
+  {
+    "first_two_letters": "グラ",
+    "matching_names": [
+      "グラードン",
+      "グライオン",
+      "グライガー",
+      "グラエナ",
+      "グランブル"
+    ]
+  },
+  {
+    "first_two_letters": "クラ",
+    "matching_names": [
+      "クラブ"
+    ]
+  },
+  {
+    "first_two_letters": "クリ",
+    "matching_names": [
+      "クリムガン"
+    ]
+  },
+  {
+    "first_two_letters": "グル",
+    "matching_names": [
+      "グルトン"
+    ]
+  },
+  {
+    "first_two_letters": "クル",
+    "matching_names": [
+      "クルマユ",
+      "クルミル"
+    ]
+  },
+  {
+    "first_two_letters": "グレ",
+    "matching_names": [
+      "グレイシア",
+      "グレッグル",
+      "グレンアルマ"
+    ]
+  },
+  {
+    "first_two_letters": "クレ",
+    "matching_names": [
+      "クレセリア",
+      "クレッフィ",
+      "クレベース"
+    ]
+  },
+  {
+    "first_two_letters": "クロ",
+    "matching_names": [
+      "クロバット"
+    ]
+  },
+  {
+    "first_two_letters": "クワ",
+    "matching_names": [
+      "クワガノン",
+      "クワッス"
+    ]
+  },
+  {
+    "first_two_letters": "ケイ",
+    "matching_names": [
+      "ケイコウオ"
+    ]
+  },
+  {
+    "first_two_letters": "ケー",
+    "matching_names": [
+      "ケーシィ"
+    ]
+  },
+  {
+    "first_two_letters": "ケケ",
+    "matching_names": [
+      "ケケンカニ"
+    ]
+  },
+  {
+    "first_two_letters": "ゲコ",
+    "matching_names": [
+      "ゲコガシラ"
+    ]
+  },
+  {
+    "first_two_letters": "ケッ",
+    "matching_names": [
+      "ケッキング"
+    ]
+  },
+  {
+    "first_two_letters": "ゲッ",
+    "matching_names": [
+      "ゲッコウガ"
+    ]
+  },
+  {
+    "first_two_letters": "ゲノ",
+    "matching_names": [
+      "ゲノセクト"
+    ]
+  },
+  {
+    "first_two_letters": "ケム",
+    "matching_names": [
+      "ケムッソ"
+    ]
+  },
+  {
+    "first_two_letters": "ケラ",
+    "matching_names": [
+      "ケララッパ"
+    ]
+  },
+  {
+    "first_two_letters": "ケル",
+    "matching_names": [
+      "ケルディオ"
+    ]
+  },
+  {
+    "first_two_letters": "ケロ",
+    "matching_names": [
+      "ケロマツ"
+    ]
+  },
+  {
+    "first_two_letters": "ゲン",
+    "matching_names": [
+      "ゲンガー"
+    ]
+  },
+  {
+    "first_two_letters": "ケン",
+    "matching_names": [
+      "ケンタロス",
+      "ケンホロウ"
+    ]
+  },
+  {
+    "first_two_letters": "コア",
+    "matching_names": [
+      "コアルヒー"
+    ]
+  },
+  {
+    "first_two_letters": "コイ",
+    "matching_names": [
+      "コイキング",
+      "コイル"
+    ]
+  },
+  {
+    "first_two_letters": "ゴウ",
+    "matching_names": [
+      "ゴウカザル"
+    ]
+  },
+  {
+    "first_two_letters": "ゴー",
+    "matching_names": [
+      "ゴーゴート",
+      "ゴース",
+      "ゴースト",
+      "ゴーリキー"
+    ]
+  },
+  {
+    "first_two_letters": "コー",
+    "matching_names": [
+      "コータス"
+    ]
+  },
+  {
+    "first_two_letters": "コオ",
+    "matching_names": [
+      "コオリッポ"
+    ]
+  },
+  {
+    "first_two_letters": "コク",
+    "matching_names": [
+      "コクーン"
+    ]
+  },
+  {
+    "first_two_letters": "ゴク",
+    "matching_names": [
+      "ゴクリン"
+    ]
+  },
+  {
+    "first_two_letters": "ココ",
+    "matching_names": [
+      "ココガラ",
+      "ココドラ",
+      "ココロモリ"
+    ]
+  },
+  {
+    "first_two_letters": "コジ",
+    "matching_names": [
+      "コジオ",
+      "コジョフー",
+      "コジョンド"
+    ]
+  },
+  {
+    "first_two_letters": "コス",
+    "matching_names": [
+      "コスモウム",
+      "コスモッグ"
+    ]
+  },
+  {
+    "first_two_letters": "コソ",
+    "matching_names": [
+      "コソクムシ"
+    ]
+  },
+  {
+    "first_two_letters": "コダ",
+    "matching_names": [
+      "コダック"
+    ]
+  },
+  {
+    "first_two_letters": "ゴチ",
+    "matching_names": [
+      "ゴチミル",
+      "ゴチム",
+      "ゴチルゼル"
+    ]
+  },
+  {
+    "first_two_letters": "コド",
+    "matching_names": [
+      "コドラ"
+    ]
+  },
+  {
+    "first_two_letters": "ゴニ",
+    "matching_names": [
+      "ゴニョニョ"
+    ]
+  },
+  {
+    "first_two_letters": "コノ",
+    "matching_names": [
+      "コノハナ",
+      "コノヨザル"
+    ]
+  },
+  {
+    "first_two_letters": "コバ",
+    "matching_names": [
+      "コバルオン"
+    ]
+  },
+  {
+    "first_two_letters": "ゴビ",
+    "matching_names": [
+      "ゴビット"
+    ]
+  },
+  {
+    "first_two_letters": "コフ",
+    "matching_names": [
+      "コフーライ",
+      "コフキムシ"
+    ]
+  },
+  {
+    "first_two_letters": "ゴマ",
+    "matching_names": [
+      "ゴマゾウ"
+    ]
+  },
+  {
+    "first_two_letters": "コマ",
+    "matching_names": [
+      "コマタナ"
+    ]
+  },
+  {
+    "first_two_letters": "コモ",
+    "matching_names": [
+      "コモルー"
+    ]
+  },
+  {
+    "first_two_letters": "コラ",
+    "matching_names": [
+      "コライドン",
+      "コラッタ"
+    ]
+  },
+  {
+    "first_two_letters": "ゴリ",
+    "matching_names": [
+      "ゴリランダー"
+    ]
+  },
+  {
+    "first_two_letters": "コリ",
+    "matching_names": [
+      "コリンク"
+    ]
+  },
+  {
+    "first_two_letters": "ゴル",
+    "matching_names": [
+      "ゴルーグ",
+      "ゴルダック",
+      "ゴルバット"
+    ]
+  },
+  {
+    "first_two_letters": "コレ",
+    "matching_names": [
+      "コレクレー"
+    ]
+  },
+  {
+    "first_two_letters": "ゴロ",
+    "matching_names": [
+      "ゴローニャ",
+      "ゴローン",
+      "ゴロンダ"
+    ]
+  },
+  {
+    "first_two_letters": "コロ",
+    "matching_names": [
+      "コロトック",
+      "コロボーシ",
+      "コロモリ"
+    ]
+  },
+  {
+    "first_two_letters": "コン",
+    "matching_names": [
+      "コンパン"
+    ]
+  },
+  {
+    "first_two_letters": "ゴン",
+    "matching_names": [
+      "ゴンベ"
+    ]
+  },
+  {
+    "first_two_letters": "サー",
+    "matching_names": [
+      "サーナイト",
+      "サーフゴー"
+    ]
+  },
+  {
+    "first_two_letters": "サイ",
+    "matching_names": [
+      "サイドン",
+      "サイホーン"
+    ]
+  },
+  {
+    "first_two_letters": "サク",
+    "matching_names": [
+      "サクラビス"
+    ]
+  },
+  {
+    "first_two_letters": "サケ",
+    "matching_names": [
+      "サケブシッポ"
+    ]
+  },
+  {
+    "first_two_letters": "サザ",
+    "matching_names": [
+      "サザンドラ"
+    ]
+  },
+  {
+    "first_two_letters": "ザシ",
+    "matching_names": [
+      "ザシアン"
+    ]
+  },
+  {
+    "first_two_letters": "サシ",
+    "matching_names": [
+      "サシカマス"
+    ]
+  },
+  {
+    "first_two_letters": "サダ",
+    "matching_names": [
+      "サダイジャ"
+    ]
+  },
+  {
+    "first_two_letters": "サッ",
+    "matching_names": [
+      "サッチムシ"
+    ]
+  },
+  {
+    "first_two_letters": "サナ",
+    "matching_names": [
+      "サナギラス"
+    ]
+  },
+  {
+    "first_two_letters": "サニ",
+    "matching_names": [
+      "サニーゴ",
+      "サニゴーン"
+    ]
+  },
+  {
+    "first_two_letters": "サボ",
+    "matching_names": [
+      "サボネア"
+    ]
+  },
+  {
+    "first_two_letters": "ザマ",
+    "matching_names": [
+      "ザマゼンタ"
+    ]
+  },
+  {
+    "first_two_letters": "サマ",
+    "matching_names": [
+      "サマヨール"
+    ]
+  },
+  {
+    "first_two_letters": "サメ",
+    "matching_names": [
+      "サメハダー"
+    ]
+  },
+  {
+    "first_two_letters": "ザル",
+    "matching_names": [
+      "ザルード"
+    ]
+  },
+  {
+    "first_two_letters": "サル",
+    "matching_names": [
+      "サルノリ"
+    ]
+  },
+  {
+    "first_two_letters": "サワ",
+    "matching_names": [
+      "サワムラー"
+    ]
+  },
+  {
+    "first_two_letters": "ザン",
+    "matching_names": [
+      "ザングース"
+    ]
+  },
+  {
+    "first_two_letters": "サン",
+    "matching_names": [
+      "サンダー",
+      "サンダース",
+      "サンド",
+      "サンドパン"
+    ]
+  },
+  {
+    "first_two_letters": "シー",
+    "matching_names": [
+      "シードラ"
+    ]
+  },
+  {
+    "first_two_letters": "ジー",
+    "matching_names": [
+      "ジーランス"
+    ]
+  },
+  {
+    "first_two_letters": "シェ",
+    "matching_names": [
+      "シェイミ",
+      "シェルダー"
+    ]
+  },
+  {
+    "first_two_letters": "ジオ",
+    "matching_names": [
+      "ジオヅム"
+    ]
+  },
+  {
+    "first_two_letters": "ジガ",
+    "matching_names": [
+      "ジガルデ"
+    ]
+  },
+  {
+    "first_two_letters": "シガ",
+    "matching_names": [
+      "シガロコ"
+    ]
+  },
+  {
+    "first_two_letters": "シキ",
+    "matching_names": [
+      "シキジカ"
+    ]
+  },
+  {
+    "first_two_letters": "ジグ",
+    "matching_names": [
+      "ジグザグマ"
+    ]
+  },
+  {
+    "first_two_letters": "シザ",
+    "matching_names": [
+      "シザリガー"
+    ]
+  },
+  {
+    "first_two_letters": "ジジ",
+    "matching_names": [
+      "ジジーロン"
+    ]
+  },
+  {
+    "first_two_letters": "シシ",
+    "matching_names": [
+      "シシコ"
+    ]
+  },
+  {
+    "first_two_letters": "シズ",
+    "matching_names": [
+      "シズクモ"
+    ]
+  },
+  {
+    "first_two_letters": "ジバ",
+    "matching_names": [
+      "ジバコイル"
+    ]
+  },
+  {
+    "first_two_letters": "シビ",
+    "matching_names": [
+      "シビシラス",
+      "シビビール",
+      "シビルドン"
+    ]
+  },
+  {
+    "first_two_letters": "ジヘ",
+    "matching_names": [
+      "ジヘッド"
+    ]
+  },
+  {
+    "first_two_letters": "シマ",
+    "matching_names": [
+      "シママ"
+    ]
+  },
+  {
+    "first_two_letters": "ジメ",
+    "matching_names": [
+      "ジメレオン"
+    ]
+  },
+  {
+    "first_two_letters": "ジャ",
+    "matching_names": [
+      "ジャノビー",
+      "ジャラコ",
+      "ジャラランガ",
+      "ジャランゴ",
+      "ジャローダ"
+    ]
+  },
+  {
+    "first_two_letters": "シャ",
+    "matching_names": [
+      "シャリタツ",
+      "シャワーズ",
+      "シャンデラ"
+    ]
+  },
+  {
+    "first_two_letters": "ジュ",
+    "matching_names": [
+      "ジュカイン",
+      "ジュゴン",
+      "ジュナイパー",
+      "ジュプトル",
+      "ジュペッタ",
+      "ジュラルドン"
+    ]
+  },
+  {
+    "first_two_letters": "シュ",
+    "matching_names": [
+      "シュシュプ",
+      "シュバルゴ"
+    ]
+  },
+  {
+    "first_two_letters": "ジラ",
+    "matching_names": [
+      "ジラーチ"
+    ]
+  },
+  {
+    "first_two_letters": "シル",
+    "matching_names": [
+      "シルヴァディ",
+      "シルシュルー"
+    ]
+  },
+  {
+    "first_two_letters": "シロ",
+    "matching_names": [
+      "シロデスナ"
+    ]
+  },
+  {
+    "first_two_letters": "シン",
+    "matching_names": [
+      "シンボラー"
+    ]
+  },
+  {
+    "first_two_letters": "スイ",
+    "matching_names": [
+      "スイクン"
+    ]
+  },
+  {
+    "first_two_letters": "ズガ",
+    "matching_names": [
+      "ズガイドス",
+      "ズガドーン"
+    ]
+  },
+  {
+    "first_two_letters": "スカ",
+    "matching_names": [
+      "スカタンク",
+      "スカンプー"
+    ]
+  },
+  {
+    "first_two_letters": "スコ",
+    "matching_names": [
+      "スコヴィラン",
+      "スコルピ"
+    ]
+  },
+  {
+    "first_two_letters": "スタ",
+    "matching_names": [
+      "スターミー"
+    ]
+  },
+  {
+    "first_two_letters": "スト",
+    "matching_names": [
+      "ストライク",
+      "ストリンダー"
+    ]
+  },
+  {
+    "first_two_letters": "スナ",
+    "matching_names": [
+      "スナノケガワ",
+      "スナバァ",
+      "スナヘビ"
+    ]
+  },
+  {
+    "first_two_letters": "ズバ",
+    "matching_names": [
+      "ズバット"
+    ]
+  },
+  {
+    "first_two_letters": "スバ",
+    "matching_names": [
+      "スバメ"
+    ]
+  },
+  {
+    "first_two_letters": "スピ",
+    "matching_names": [
+      "スピアー"
+    ]
+  },
+  {
+    "first_two_letters": "ズピ",
+    "matching_names": [
+      "ズピカ"
+    ]
+  },
+  {
+    "first_two_letters": "スボ",
+    "matching_names": [
+      "スボミー"
+    ]
+  },
+  {
+    "first_two_letters": "スリ",
+    "matching_names": [
+      "スリーパー",
+      "スリープ"
+    ]
+  },
+  {
+    "first_two_letters": "ズル",
+    "matching_names": [
+      "ズルズキン",
+      "ズルッグ"
+    ]
+  },
+  {
+    "first_two_letters": "スワ",
+    "matching_names": [
+      "スワンナ"
+    ]
+  },
+  {
+    "first_two_letters": "セキ",
+    "matching_names": [
+      "セキタンザン"
+    ]
+  },
+  {
+    "first_two_letters": "セグ",
+    "matching_names": [
+      "セグレイブ"
+    ]
+  },
+  {
+    "first_two_letters": "ゼク",
+    "matching_names": [
+      "ゼクロム"
+    ]
+  },
+  {
+    "first_two_letters": "セゴ",
+    "matching_names": [
+      "セゴール"
+    ]
+  },
+  {
+    "first_two_letters": "ゼニ",
+    "matching_names": [
+      "ゼニガメ"
+    ]
+  },
+  {
+    "first_two_letters": "セビ",
+    "matching_names": [
+      "セビエ"
+    ]
+  },
+  {
+    "first_two_letters": "ゼブ",
+    "matching_names": [
+      "ゼブライカ"
+    ]
+  },
+  {
+    "first_two_letters": "ゼラ",
+    "matching_names": [
+      "ゼラオラ"
+    ]
+  },
+  {
+    "first_two_letters": "ゼル",
+    "matching_names": [
+      "ゼルネアス"
+    ]
+  },
+  {
+    "first_two_letters": "セレ",
+    "matching_names": [
+      "セレビィ"
+    ]
+  },
+  {
+    "first_two_letters": "ゾウ",
+    "matching_names": [
+      "ゾウドウ"
+    ]
+  },
+  {
+    "first_two_letters": "ソウ",
+    "matching_names": [
+      "ソウブレイズ"
+    ]
+  },
+  {
+    "first_two_letters": "ソー",
+    "matching_names": [
+      "ソーナノ",
+      "ソーナンス"
+    ]
+  },
+  {
+    "first_two_letters": "ソル",
+    "matching_names": [
+      "ソルガレオ",
+      "ソルロック"
+    ]
+  },
+  {
+    "first_two_letters": "ゾロ",
+    "matching_names": [
+      "ゾロア",
+      "ゾロアーク"
+    ]
+  },
+  {
+    "first_two_letters": "ダー",
+    "matching_names": [
+      "ダークライ",
+      "ダーテング"
+    ]
+  },
+  {
+    "first_two_letters": "ダイ",
+    "matching_names": [
+      "ダイオウドウ",
+      "ダイケンキ",
+      "ダイノーズ"
+    ]
+  },
+  {
+    "first_two_letters": "タイ",
+    "matching_names": [
+      "タイカイデン",
+      "タイプ：ヌル",
+      "タイレーツ"
+    ]
+  },
+  {
+    "first_two_letters": "タギ",
+    "matching_names": [
+      "タギングル"
+    ]
+  },
+  {
+    "first_two_letters": "ダグ",
+    "matching_names": [
+      "ダグトリオ"
+    ]
+  },
+  {
+    "first_two_letters": "ダク",
+    "matching_names": [
+      "ダクマ"
+    ]
+  },
+  {
+    "first_two_letters": "ダゲ",
+    "matching_names": [
+      "ダゲキ"
+    ]
+  },
+  {
+    "first_two_letters": "タケ",
+    "matching_names": [
+      "タケルライコ"
+    ]
+  },
+  {
+    "first_two_letters": "ダス",
+    "matching_names": [
+      "ダストダス"
+    ]
+  },
+  {
+    "first_two_letters": "タタ",
+    "matching_names": [
+      "タタッコ"
+    ]
+  },
+  {
+    "first_two_letters": "ダダ",
+    "matching_names": [
+      "ダダリン"
+    ]
+  },
+  {
+    "first_two_letters": "タチ",
+    "matching_names": [
+      "タチフサグマ"
+    ]
+  },
+  {
+    "first_two_letters": "タッ",
+    "matching_names": [
+      "タッツー"
+    ]
+  },
+  {
+    "first_two_letters": "タツ",
+    "matching_names": [
+      "タツベイ"
+    ]
+  },
+  {
+    "first_two_letters": "タテ",
+    "matching_names": [
+      "タテトプス"
+    ]
+  },
+  {
+    "first_two_letters": "タネ",
+    "matching_names": [
+      "タネボー"
+    ]
+  },
+  {
+    "first_two_letters": "ダブ",
+    "matching_names": [
+      "ダブラン"
+    ]
+  },
+  {
+    "first_two_letters": "タブ",
+    "matching_names": [
+      "タブンネ"
+    ]
+  },
+  {
+    "first_two_letters": "タマ",
+    "matching_names": [
+      "タマゲタケ",
+      "タマザラシ",
+      "タマタマ",
+      "タマンタ",
+      "タマンチュラ"
+    ]
+  },
+  {
+    "first_two_letters": "タル",
+    "matching_names": [
+      "タルップル"
+    ]
+  },
+  {
+    "first_two_letters": "ダル",
+    "matching_names": [
+      "ダルマッカ"
+    ]
+  },
+  {
+    "first_two_letters": "ダン",
+    "matching_names": [
+      "ダンゴロ",
+      "ダンバル"
+    ]
+  },
+  {
+    "first_two_letters": "タン",
+    "matching_names": [
+      "タンドン"
+    ]
+  },
+  {
+    "first_two_letters": "チェ",
+    "matching_names": [
+      "チェリム",
+      "チェリンボ"
+    ]
+  },
+  {
+    "first_two_letters": "チオ",
+    "matching_names": [
+      "チオンジェン"
+    ]
+  },
+  {
+    "first_two_letters": "チゴ",
+    "matching_names": [
+      "チゴラス"
+    ]
+  },
+  {
+    "first_two_letters": "チコ",
+    "matching_names": [
+      "チコリータ"
+    ]
+  },
+  {
+    "first_two_letters": "チャ",
+    "matching_names": [
+      "チャーレム",
+      "チャオブー",
+      "チャデス"
+    ]
+  },
+  {
+    "first_two_letters": "チュ",
+    "matching_names": [
+      "チュリネ"
+    ]
+  },
+  {
+    "first_two_letters": "チョ",
+    "matching_names": [
+      "チョボマキ",
+      "チョロネコ",
+      "チョンチー"
+    ]
+  },
+  {
+    "first_two_letters": "チラ",
+    "matching_names": [
+      "チラーミィ",
+      "チラチーノ"
+    ]
+  },
+  {
+    "first_two_letters": "チリ",
+    "matching_names": [
+      "チリーン"
+    ]
+  },
+  {
+    "first_two_letters": "チル",
+    "matching_names": [
+      "チルタリス",
+      "チルット"
+    ]
+  },
+  {
+    "first_two_letters": "チヲ",
+    "matching_names": [
+      "チヲハウハネ"
+    ]
+  },
+  {
+    "first_two_letters": "ツタ",
+    "matching_names": [
+      "ツタージャ"
+    ]
+  },
+  {
+    "first_two_letters": "ツチ",
+    "matching_names": [
+      "ツチニン"
+    ]
+  },
+  {
+    "first_two_letters": "ツツ",
+    "matching_names": [
+      "ツツケラ"
+    ]
+  },
+  {
+    "first_two_letters": "ツボ",
+    "matching_names": [
+      "ツボツボ"
+    ]
+  },
+  {
+    "first_two_letters": "ツン",
+    "matching_names": [
+      "ツンデツンデ",
+      "ツンベアー"
+    ]
+  },
+  {
+    "first_two_letters": "ディ",
+    "matching_names": [
+      "ディアルガ",
+      "ディアンシー",
+      "ディグダ",
+      "ディンルー"
+    ]
+  },
+  {
+    "first_two_letters": "テー",
+    "matching_names": [
+      "テールナー"
+    ]
+  },
+  {
+    "first_two_letters": "デオ",
+    "matching_names": [
+      "デオキシス"
+    ]
+  },
+  {
+    "first_two_letters": "デカ",
+    "matching_names": [
+      "デカグース",
+      "デカヌチャン"
+    ]
+  },
+  {
+    "first_two_letters": "デス",
+    "matching_names": [
+      "デスカーン",
+      "デスバーン",
+      "デスマス"
+    ]
+  },
+  {
+    "first_two_letters": "テッ",
+    "matching_names": [
+      "テッカグヤ",
+      "テッカニン",
+      "テッシード",
+      "テッポウオ"
+    ]
+  },
+  {
+    "first_two_letters": "テツ",
+    "matching_names": [
+      "テツノイサハ",
+      "テツノイバラ",
+      "テツノイワオ",
+      "テツノカイナ",
+      "テツノカシラ",
+      "テツノコウベ",
+      "テツノツツミ",
+      "テツノドクガ",
+      "テツノブジン",
+      "テツノワダチ"
+    ]
+  },
+  {
+    "first_two_letters": "デデ",
+    "matching_names": [
+      "デデンネ"
+    ]
+  },
+  {
+    "first_two_letters": "テブ",
+    "matching_names": [
+      "テブリム"
+    ]
+  },
+  {
+    "first_two_letters": "テラ",
+    "matching_names": [
+      "テラキオン",
+      "テラパゴス"
+    ]
+  },
+  {
+    "first_two_letters": "デリ",
+    "matching_names": [
+      "デリバード"
+    ]
+  },
+  {
+    "first_two_letters": "デル",
+    "matching_names": [
+      "デルビル"
+    ]
+  },
+  {
+    "first_two_letters": "デン",
+    "matching_names": [
+      "デンジュモク",
+      "デンヂムシ",
+      "デンチュラ",
+      "デンリュウ"
+    ]
+  },
+  {
+    "first_two_letters": "ドオ",
+    "matching_names": [
+      "ドオー"
+    ]
+  },
+  {
+    "first_two_letters": "ドー",
+    "matching_names": [
+      "ドータクン",
+      "ドードー",
+      "ドードリオ",
+      "ドーブル",
+      "ドーミラー"
+    ]
+  },
+  {
+    "first_two_letters": "ドガ",
+    "matching_names": [
+      "ドガース"
+    ]
+  },
+  {
+    "first_two_letters": "ドク",
+    "matching_names": [
+      "ドククラゲ",
+      "ドクケイル",
+      "ドクロッグ"
+    ]
+  },
+  {
+    "first_two_letters": "トゲ",
+    "matching_names": [
+      "トゲキッス",
+      "トゲチック",
+      "トゲデマル",
+      "トゲピー"
+    ]
+  },
+  {
+    "first_two_letters": "ドゴ",
+    "matching_names": [
+      "ドゴーム"
+    ]
+  },
+  {
+    "first_two_letters": "ドサ",
+    "matching_names": [
+      "ドサイドン"
+    ]
+  },
+  {
+    "first_two_letters": "トサ",
+    "matching_names": [
+      "トサキント"
+    ]
+  },
+  {
+    "first_two_letters": "ドジ",
+    "matching_names": [
+      "ドジョッチ"
+    ]
+  },
+  {
+    "first_two_letters": "ドダ",
+    "matching_names": [
+      "ドダイトス"
+    ]
+  },
+  {
+    "first_two_letters": "ドッ",
+    "matching_names": [
+      "ドッコラー"
+    ]
+  },
+  {
+    "first_two_letters": "ドデ",
+    "matching_names": [
+      "ドデカバシ"
+    ]
+  },
+  {
+    "first_two_letters": "ドテ",
+    "matching_names": [
+      "ドテッコツ"
+    ]
+  },
+  {
+    "first_two_letters": "トド",
+    "matching_names": [
+      "トドグラー",
+      "トドゼルガ",
+      "トドロクツキ"
+    ]
+  },
+  {
+    "first_two_letters": "ドド",
+    "matching_names": [
+      "ドドゲザン"
+    ]
+  },
+  {
+    "first_two_letters": "ドヒ",
+    "matching_names": [
+      "ドヒドイデ"
+    ]
+  },
+  {
+    "first_two_letters": "ドラ",
+    "matching_names": [
+      "ドラパルト",
+      "ドラピオン",
+      "ドラミドロ",
+      "ドラメシヤ"
+    ]
+  },
+  {
+    "first_two_letters": "トラ",
+    "matching_names": [
+      "トランセル"
+    ]
+  },
+  {
+    "first_two_letters": "トリ",
+    "matching_names": [
+      "トリデプス",
+      "トリトドン",
+      "トリミアン"
+    ]
+  },
+  {
+    "first_two_letters": "ドリ",
+    "matching_names": [
+      "ドリュウズ"
+    ]
+  },
+  {
+    "first_two_letters": "トル",
+    "matching_names": [
+      "トルネロス"
+    ]
+  },
+  {
+    "first_two_letters": "ドレ",
+    "matching_names": [
+      "ドレディア"
+    ]
+  },
+  {
+    "first_two_letters": "トロ",
+    "matching_names": [
+      "トロッゴン",
+      "トロピウス"
+    ]
+  },
+  {
+    "first_two_letters": "ドロ",
+    "matching_names": [
+      "ドロバンコ",
+      "ドロンチ"
+    ]
+  },
+  {
+    "first_two_letters": "ドン",
+    "matching_names": [
+      "ドンカラス",
+      "ドンファン",
+      "ドンメル"
+    ]
+  },
+  {
+    "first_two_letters": "ナエ",
+    "matching_names": [
+      "ナエトル"
+    ]
+  },
+  {
+    "first_two_letters": "ナカ",
+    "matching_names": [
+      "ナカヌチャン"
+    ]
+  },
+  {
+    "first_two_letters": "ナゲ",
+    "matching_names": [
+      "ナゲキ",
+      "ナゲツケサル"
+    ]
+  },
+  {
+    "first_two_letters": "ナゾ",
+    "matching_names": [
+      "ナゾノクサ"
+    ]
+  },
+  {
+    "first_two_letters": "ナッ",
+    "matching_names": [
+      "ナックラー",
+      "ナッシー",
+      "ナットレイ"
+    ]
+  },
+  {
+    "first_two_letters": "ナマ",
+    "matching_names": [
+      "ナマケロ",
+      "ナマコブシ",
+      "ナマズン"
+    ]
+  },
+  {
+    "first_two_letters": "ナミ",
+    "matching_names": [
+      "ナミイルカ"
+    ]
+  },
+  {
+    "first_two_letters": "ニダ",
+    "matching_names": [
+      "ニダンギル"
+    ]
+  },
+  {
+    "first_two_letters": "ニド",
+    "matching_names": [
+      "ニドキング",
+      "ニドクイン",
+      "ニドラン♀",
+      "ニドラン♂",
+      "ニドリーナ",
+      "ニドリーノ"
+    ]
+  },
+  {
+    "first_two_letters": "ニャ",
+    "matching_names": [
+      "ニャース",
+      "ニャイキング",
+      "ニャオニクス",
+      "ニャオハ",
+      "ニャスパー",
+      "ニャビー",
+      "ニャヒート",
+      "ニャルマー",
+      "ニャローテ"
+    ]
+  },
+  {
+    "first_two_letters": "ニュ",
+    "matching_names": [
+      "ニューラ"
+    ]
+  },
+  {
+    "first_two_letters": "ニョ",
+    "matching_names": [
+      "ニョロゾ",
+      "ニョロトノ",
+      "ニョロボン",
+      "ニョロモ"
+    ]
+  },
+  {
+    "first_two_letters": "ニン",
+    "matching_names": [
+      "ニンフィア"
+    ]
+  },
+  {
+    "first_two_letters": "ヌイ",
+    "matching_names": [
+      "ヌイコグマ"
+    ]
+  },
+  {
+    "first_two_letters": "ヌオ",
+    "matching_names": [
+      "ヌオー"
+    ]
+  },
+  {
+    "first_two_letters": "ヌケ",
+    "matching_names": [
+      "ヌケニン"
+    ]
+  },
+  {
+    "first_two_letters": "ヌマ",
+    "matching_names": [
+      "ヌマクロー"
+    ]
+  },
+  {
+    "first_two_letters": "ヌメ",
+    "matching_names": [
+      "ヌメイル",
+      "ヌメラ",
+      "ヌメルゴン"
+    ]
+  },
+  {
+    "first_two_letters": "ネイ",
+    "matching_names": [
+      "ネイティ",
+      "ネイティオ"
+    ]
+  },
+  {
+    "first_two_letters": "ネオ",
+    "matching_names": [
+      "ネオラント"
+    ]
+  },
+  {
+    "first_two_letters": "ネギ",
+    "matching_names": [
+      "ネギガナイト"
+    ]
+  },
+  {
+    "first_two_letters": "ネク",
+    "matching_names": [
+      "ネクロズマ"
+    ]
+  },
+  {
+    "first_two_letters": "ネッ",
+    "matching_names": [
+      "ネッコアラ"
+    ]
+  },
+  {
+    "first_two_letters": "ネマ",
+    "matching_names": [
+      "ネマシュ"
+    ]
+  },
+  {
+    "first_two_letters": "ネン",
+    "matching_names": [
+      "ネンドール"
+    ]
+  },
+  {
+    "first_two_letters": "ノク",
+    "matching_names": [
+      "ノクタス"
+    ]
+  },
+  {
+    "first_two_letters": "ノコ",
+    "matching_names": [
+      "ノココッチ",
+      "ノコッチ"
+    ]
+  },
+  {
+    "first_two_letters": "ノズ",
+    "matching_names": [
+      "ノズパス"
+    ]
+  },
+  {
+    "first_two_letters": "ノノ",
+    "matching_names": [
+      "ノノクラゲ"
+    ]
+  },
+  {
+    "first_two_letters": "ハー",
+    "matching_names": [
+      "ハーデリア"
+    ]
+  },
+  {
+    "first_two_letters": "パー",
+    "matching_names": [
+      "パーモット",
+      "パールル"
+    ]
+  },
+  {
+    "first_two_letters": "バイ",
+    "matching_names": [
+      "バイウールー",
+      "バイバニラ"
+    ]
+  },
+  {
+    "first_two_letters": "バウ",
+    "matching_names": [
+      "バウッツェル"
+    ]
+  },
+  {
+    "first_two_letters": "パウ",
+    "matching_names": [
+      "パウワウ"
+    ]
+  },
+  {
+    "first_two_letters": "パオ",
+    "matching_names": [
+      "パオジアン"
+    ]
+  },
+  {
+    "first_two_letters": "バオ",
+    "matching_names": [
+      "バオッキー",
+      "バオップ"
+    ]
+  },
+  {
+    "first_two_letters": "ハカ",
+    "matching_names": [
+      "ハカドッグ"
+    ]
+  },
+  {
+    "first_two_letters": "ハガ",
+    "matching_names": [
+      "ハガネール"
+    ]
+  },
+  {
+    "first_two_letters": "ハギ",
+    "matching_names": [
+      "ハギギシリ"
+    ]
+  },
+  {
+    "first_two_letters": "バク",
+    "matching_names": [
+      "バクーダ",
+      "バクオング",
+      "バクガメス",
+      "バクフーン"
+    ]
+  },
+  {
+    "first_two_letters": "ハク",
+    "matching_names": [
+      "ハクリュー"
+    ]
+  },
+  {
+    "first_two_letters": "バケ",
+    "matching_names": [
+      "バケッチャ"
+    ]
+  },
+  {
+    "first_two_letters": "バサ",
+    "matching_names": [
+      "バサギリ"
+    ]
+  },
+  {
+    "first_two_letters": "バシ",
+    "matching_names": [
+      "バシャーモ"
+    ]
+  },
+  {
+    "first_two_letters": "ハス",
+    "matching_names": [
+      "ハスブレロ",
+      "ハスボー"
+    ]
+  },
+  {
+    "first_two_letters": "バス",
+    "matching_names": [
+      "バスラオ"
+    ]
+  },
+  {
+    "first_two_letters": "バタ",
+    "matching_names": [
+      "バタフリー"
+    ]
+  },
+  {
+    "first_two_letters": "バチ",
+    "matching_names": [
+      "バチュル",
+      "バチンウニ",
+      "バチンキー"
+    ]
+  },
+  {
+    "first_two_letters": "パチ",
+    "matching_names": [
+      "パチリス"
+    ]
+  },
+  {
+    "first_two_letters": "ハッ",
+    "matching_names": [
+      "ハッサム"
+    ]
+  },
+  {
+    "first_two_letters": "パッ",
+    "matching_names": [
+      "パッチール",
+      "パッチラゴン",
+      "パッチルドン"
+    ]
+  },
+  {
+    "first_two_letters": "バッ",
+    "matching_names": [
+      "バッフロン"
+    ]
+  },
+  {
+    "first_two_letters": "ハト",
+    "matching_names": [
+      "ハトーボー"
+    ]
+  },
+  {
+    "first_two_letters": "バド",
+    "matching_names": [
+      "バドレックス"
+    ]
+  },
+  {
+    "first_two_letters": "バニ",
+    "matching_names": [
+      "バニプッチ",
+      "バニリッチ"
+    ]
+  },
+  {
+    "first_two_letters": "ハネ",
+    "matching_names": [
+      "ハネッコ"
+    ]
+  },
+  {
+    "first_two_letters": "バネ",
+    "matching_names": [
+      "バネブー"
+    ]
+  },
+  {
+    "first_two_letters": "ハハ",
+    "matching_names": [
+      "ハハコモリ"
+    ]
+  },
+  {
+    "first_two_letters": "ハバ",
+    "matching_names": [
+      "ハバタクカミ"
+    ]
+  },
+  {
+    "first_two_letters": "ハピ",
+    "matching_names": [
+      "ハピナス"
+    ]
+  },
+  {
+    "first_two_letters": "パピ",
+    "matching_names": [
+      "パピモッチ"
+    ]
+  },
+  {
+    "first_two_letters": "ハブ",
+    "matching_names": [
+      "ハブネーク"
+    ]
+  },
+  {
+    "first_two_letters": "パフ",
+    "matching_names": [
+      "パフュートン"
+    ]
+  },
+  {
+    "first_two_letters": "パモ",
+    "matching_names": [
+      "パモ",
+      "パモット"
+    ]
+  },
+  {
+    "first_two_letters": "ハヤ",
+    "matching_names": [
+      "ハヤシガメ"
+    ]
+  },
+  {
+    "first_two_letters": "パラ",
+    "matching_names": [
+      "パラス",
+      "パラセクト"
+    ]
+  },
+  {
+    "first_two_letters": "ハラ",
+    "matching_names": [
+      "ハラバリー"
+    ]
+  },
+  {
+    "first_two_letters": "ハリ",
+    "matching_names": [
+      "ハリーセン",
+      "ハリーマン",
+      "ハリテヤマ",
+      "ハリボーグ",
+      "ハリマロン"
+    ]
+  },
+  {
+    "first_two_letters": "バリ",
+    "matching_names": [
+      "バリコオル",
+      "バリヤード"
+    ]
+  },
+  {
+    "first_two_letters": "パル",
+    "matching_names": [
+      "パルキア",
+      "パルシェン",
+      "パルスワン"
+    ]
+  },
+  {
+    "first_two_letters": "バル",
+    "matching_names": [
+      "バルキー",
+      "バルジーナ",
+      "バルチャイ",
+      "バルビート"
+    ]
+  },
+  {
+    "first_two_letters": "ハル",
+    "matching_names": [
+      "ハルクジラ"
+    ]
+  },
+  {
+    "first_two_letters": "バン",
+    "matching_names": [
+      "バンギラス",
+      "バンバドロ"
+    ]
+  },
+  {
+    "first_two_letters": "ハン",
+    "matching_names": [
+      "ハンテール"
+    ]
+  },
+  {
+    "first_two_letters": "パン",
+    "matching_names": [
+      "パンプジン"
+    ]
+  },
+  {
+    "first_two_letters": "ピィ",
+    "matching_names": [
+      "ピィ"
+    ]
+  },
+  {
+    "first_two_letters": "ビー",
+    "matching_names": [
+      "ビークイン",
+      "ビーダル",
+      "ビードル"
+    ]
+  },
+  {
+    "first_two_letters": "ヒー",
+    "matching_names": [
+      "ヒードラン"
+    ]
+  },
+  {
+    "first_two_letters": "ピカ",
+    "matching_names": [
+      "ピカチュウ"
+    ]
+  },
+  {
+    "first_two_letters": "ピク",
+    "matching_names": [
+      "ピクシー"
+    ]
+  },
+  {
+    "first_two_letters": "ビク",
+    "matching_names": [
+      "ビクティニ"
+    ]
+  },
+  {
+    "first_two_letters": "ヒコ",
+    "matching_names": [
+      "ヒコザル"
+    ]
+  },
+  {
+    "first_two_letters": "ピジ",
+    "matching_names": [
+      "ピジョット",
+      "ピジョン"
+    ]
+  },
+  {
+    "first_two_letters": "ピチ",
+    "matching_names": [
+      "ピチュー"
+    ]
+  },
+  {
+    "first_two_letters": "ビッ",
+    "matching_names": [
+      "ビッパ"
+    ]
+  },
+  {
+    "first_two_letters": "ピッ",
+    "matching_names": [
+      "ピッピ"
+    ]
+  },
+  {
+    "first_two_letters": "ヒド",
+    "matching_names": [
+      "ヒドイデ"
+    ]
+  },
+  {
+    "first_two_letters": "ヒト",
+    "matching_names": [
+      "ヒトカゲ",
+      "ヒトツキ",
+      "ヒトデマン",
+      "ヒトモシ"
+    ]
+  },
+  {
+    "first_two_letters": "ヒノ",
+    "matching_names": [
+      "ヒノアラシ",
+      "ヒノヤコマ"
+    ]
+  },
+  {
+    "first_two_letters": "ヒバ",
+    "matching_names": [
+      "ヒバニー"
+    ]
+  },
+  {
+    "first_two_letters": "ヒヒ",
+    "matching_names": [
+      "ヒヒダルマ"
+    ]
+  },
+  {
+    "first_two_letters": "ビビ",
+    "matching_names": [
+      "ビビヨン"
+    ]
+  },
+  {
+    "first_two_letters": "ビブ",
+    "matching_names": [
+      "ビブラーバ"
+    ]
+  },
+  {
+    "first_two_letters": "ヒポ",
+    "matching_names": [
+      "ヒポポタス"
+    ]
+  },
+  {
+    "first_two_letters": "ヒマ",
+    "matching_names": [
+      "ヒマナッツ"
+    ]
+  },
+  {
+    "first_two_letters": "ヒメ",
+    "matching_names": [
+      "ヒメグマ",
+      "ヒメンカ"
+    ]
+  },
+  {
+    "first_two_letters": "ヒヤ",
+    "matching_names": [
+      "ヒヤッキー",
+      "ヒヤップ"
+    ]
+  },
+  {
+    "first_two_letters": "ヒラ",
+    "matching_names": [
+      "ヒラヒナ"
+    ]
+  },
+  {
+    "first_two_letters": "ビリ",
+    "matching_names": [
+      "ビリジオン",
+      "ビリリダマ"
+    ]
+  },
+  {
+    "first_two_letters": "ヒン",
+    "matching_names": [
+      "ヒンバス"
+    ]
+  },
+  {
+    "first_two_letters": "ピン",
+    "matching_names": [
+      "ピンプク"
+    ]
+  },
+  {
+    "first_two_letters": "ファ",
+    "matching_names": [
+      "ファイアロー",
+      "ファイヤー"
+    ]
+  },
+  {
+    "first_two_letters": "フィ",
+    "matching_names": [
+      "フィオネ"
+    ]
+  },
+  {
+    "first_two_letters": "ブイ",
+    "matching_names": [
+      "ブイゼル"
+    ]
+  },
+  {
+    "first_two_letters": "ブー",
+    "matching_names": [
+      "ブースター",
+      "ブーバー",
+      "ブーバーン",
+      "ブーピッグ"
+    ]
+  },
+  {
+    "first_two_letters": "フー",
+    "matching_names": [
+      "フーディン",
+      "フーパ"
+    ]
+  },
+  {
+    "first_two_letters": "フェ",
+    "matching_names": [
+      "フェローチェ"
+    ]
+  },
+  {
+    "first_two_letters": "フォ",
+    "matching_names": [
+      "フォクスライ",
+      "フォッコ",
+      "フォレトス"
+    ]
+  },
+  {
+    "first_two_letters": "フカ",
+    "matching_names": [
+      "フカマル"
+    ]
+  },
+  {
+    "first_two_letters": "フク",
+    "matching_names": [
+      "フクスロー"
+    ]
+  },
+  {
+    "first_two_letters": "プク",
+    "matching_names": [
+      "プクリン"
+    ]
+  },
+  {
+    "first_two_letters": "フシ",
+    "matching_names": [
+      "フシギソウ",
+      "フシギダネ",
+      "フシギバナ",
+      "フシデ"
+    ]
+  },
+  {
+    "first_two_letters": "フタ",
+    "matching_names": [
+      "フタチマル"
+    ]
+  },
+  {
+    "first_two_letters": "プテ",
+    "matching_names": [
+      "プテラ"
+    ]
+  },
+  {
+    "first_two_letters": "ブニ",
+    "matching_names": [
+      "ブニャット"
+    ]
+  },
+  {
+    "first_two_letters": "ブビ",
+    "matching_names": [
+      "ブビィ"
+    ]
+  },
+  {
+    "first_two_letters": "ププ",
+    "matching_names": [
+      "ププリン"
+    ]
+  },
+  {
+    "first_two_letters": "フラ",
+    "matching_names": [
+      "フラージェス",
+      "フライゴン",
+      "フラエッテ",
+      "フラベベ"
+    ]
+  },
+  {
+    "first_two_letters": "プラ",
+    "matching_names": [
+      "プラスル"
+    ]
+  },
+  {
+    "first_two_letters": "ブラ",
+    "matching_names": [
+      "ブラッキー"
+    ]
+  },
+  {
+    "first_two_letters": "フリ",
+    "matching_names": [
+      "フリーザー",
+      "フリージオ"
+    ]
+  },
+  {
+    "first_two_letters": "ブリ",
+    "matching_names": [
+      "ブリガロン",
+      "ブリザポス",
+      "ブリジュラス",
+      "ブリムオン"
+    ]
+  },
+  {
+    "first_two_letters": "プリ",
+    "matching_names": [
+      "プリン"
+    ]
+  },
+  {
+    "first_two_letters": "ブル",
+    "matching_names": [
+      "ブルー",
+      "ブルンゲル"
+    ]
+  },
+  {
+    "first_two_letters": "プル",
+    "matching_names": [
+      "プルリル"
+    ]
+  },
+  {
+    "first_two_letters": "フレ",
+    "matching_names": [
+      "フレフワン"
+    ]
+  },
+  {
+    "first_two_letters": "フロ",
+    "matching_names": [
+      "フローゼル"
+    ]
+  },
+  {
+    "first_two_letters": "ブロ",
+    "matching_names": [
+      "ブロスター",
+      "ブロロローム",
+      "ブロロン"
+    ]
+  },
+  {
+    "first_two_letters": "プロ",
+    "matching_names": [
+      "プロトーガ"
+    ]
+  },
+  {
+    "first_two_letters": "フワ",
+    "matching_names": [
+      "フワライド",
+      "フワンテ"
+    ]
+  },
+  {
+    "first_two_letters": "ヘイ",
+    "matching_names": [
+      "ヘイガニ",
+      "ヘイラッシャ"
+    ]
+  },
+  {
+    "first_two_letters": "ベイ",
+    "matching_names": [
+      "ベイリーフ"
+    ]
+  },
+  {
+    "first_two_letters": "ベト",
+    "matching_names": [
+      "ベトベター",
+      "ベトベトン"
+    ]
+  },
+  {
+    "first_two_letters": "ベベ",
+    "matching_names": [
+      "ベベノム"
+    ]
+  },
+  {
+    "first_two_letters": "ベラ",
+    "matching_names": [
+      "ベラカス"
+    ]
+  },
+  {
+    "first_two_letters": "ヘラ",
+    "matching_names": [
+      "ヘラクロス"
+    ]
+  },
+  {
+    "first_two_letters": "ペラ",
+    "matching_names": [
+      "ペラップ"
+    ]
+  },
+  {
+    "first_two_letters": "ペリ",
+    "matching_names": [
+      "ペリッパー"
+    ]
+  },
+  {
+    "first_two_letters": "ヘル",
+    "matching_names": [
+      "ヘルガー"
+    ]
+  },
+  {
+    "first_two_letters": "ペル",
+    "matching_names": [
+      "ペルシアン"
+    ]
+  },
+  {
+    "first_two_letters": "ペロ",
+    "matching_names": [
+      "ペロッパフ",
+      "ペロリーム"
+    ]
+  },
+  {
+    "first_two_letters": "ベロ",
+    "matching_names": [
+      "ベロバー",
+      "ベロベルト",
+      "ベロリンガ"
+    ]
+  },
+  {
+    "first_two_letters": "ペン",
+    "matching_names": [
+      "ペンドラー"
+    ]
+  },
+  {
+    "first_two_letters": "ホイ",
+    "matching_names": [
+      "ホイーガ"
+    ]
+  },
+  {
+    "first_two_letters": "ホウ",
+    "matching_names": [
+      "ホウオウ"
+    ]
+  },
+  {
+    "first_two_letters": "ホエ",
+    "matching_names": [
+      "ホエルオー",
+      "ホエルコ"
+    ]
+  },
+  {
+    "first_two_letters": "ホー",
+    "matching_names": [
+      "ホーホー"
+    ]
+  },
+  {
+    "first_two_letters": "ボー",
+    "matching_names": [
+      "ボーマンダ"
+    ]
+  },
+  {
+    "first_two_letters": "ポカ",
+    "matching_names": [
+      "ポカブ"
+    ]
+  },
+  {
+    "first_two_letters": "ボク",
+    "matching_names": [
+      "ボクレー"
+    ]
+  },
+  {
+    "first_two_letters": "ホゲ",
+    "matching_names": [
+      "ホゲータ"
+    ]
+  },
+  {
+    "first_two_letters": "ホシ",
+    "matching_names": [
+      "ホシガリス"
+    ]
+  },
+  {
+    "first_two_letters": "ボス",
+    "matching_names": [
+      "ボスゴドラ"
+    ]
+  },
+  {
+    "first_two_letters": "ボチ",
+    "matching_names": [
+      "ボチ"
+    ]
+  },
+  {
+    "first_two_letters": "ポチ",
+    "matching_names": [
+      "ポチエナ"
+    ]
+  },
+  {
+    "first_two_letters": "ポッ",
+    "matching_names": [
+      "ポッタイシ",
+      "ポッチャマ",
+      "ポットデス",
+      "ポッポ"
+    ]
+  },
+  {
+    "first_two_letters": "ポニ",
+    "matching_names": [
+      "ポニータ"
+    ]
+  },
+  {
+    "first_two_letters": "ポポ",
+    "matching_names": [
+      "ポポッコ"
+    ]
+  },
+  {
+    "first_two_letters": "ポリ",
+    "matching_names": [
+      "ポリゴン",
+      "ポリゴン２",
+      "ポリゴンＺ"
+    ]
+  },
+  {
+    "first_two_letters": "ホル",
+    "matching_names": [
+      "ホルード",
+      "ホルビー"
+    ]
+  },
+  {
+    "first_two_letters": "ボル",
+    "matching_names": [
+      "ボルケニオン",
+      "ボルトロス"
+    ]
+  },
+  {
+    "first_two_letters": "ポワ",
+    "matching_names": [
+      "ポワルン"
+    ]
+  },
+  {
+    "first_two_letters": "マー",
+    "matching_names": [
+      "マーイーカ",
+      "マーシャドー"
+    ]
+  },
+  {
+    "first_two_letters": "マイ",
+    "matching_names": [
+      "マイナン"
+    ]
+  },
+  {
+    "first_two_letters": "マギ",
+    "matching_names": [
+      "マギアナ"
+    ]
+  },
+  {
+    "first_two_letters": "マグ",
+    "matching_names": [
+      "マグカルゴ",
+      "マグマッグ",
+      "マグマラシ"
+    ]
+  },
+  {
+    "first_two_letters": "マク",
+    "matching_names": [
+      "マクノシタ"
+    ]
+  },
+  {
+    "first_two_letters": "マケ",
+    "matching_names": [
+      "マケンカニ"
+    ]
+  },
+  {
+    "first_two_letters": "マシ",
+    "matching_names": [
+      "マシェード",
+      "マシマシラ"
+    ]
+  },
+  {
+    "first_two_letters": "マス",
+    "matching_names": [
+      "マスカーニャ",
+      "マスキッパ"
+    ]
+  },
+  {
+    "first_two_letters": "マダ",
+    "matching_names": [
+      "マダツボミ"
+    ]
+  },
+  {
+    "first_two_letters": "マタ",
+    "matching_names": [
+      "マタドガス"
+    ]
+  },
+  {
+    "first_two_letters": "マッ",
+    "matching_names": [
+      "マッギョ",
+      "マッシブーン",
+      "マッスグマ"
+    ]
+  },
+  {
+    "first_two_letters": "マナ",
+    "matching_names": [
+      "マナフィ"
+    ]
+  },
+  {
+    "first_two_letters": "マニ",
+    "matching_names": [
+      "マニューラ"
+    ]
+  },
+  {
+    "first_two_letters": "マネ",
+    "matching_names": [
+      "マネネ"
+    ]
+  },
+  {
+    "first_two_letters": "マフ",
+    "matching_names": [
+      "マフィティフ",
+      "マフォクシー"
+    ]
+  },
+  {
+    "first_two_letters": "マホ",
+    "matching_names": [
+      "マホイップ",
+      "マホミル"
+    ]
+  },
+  {
+    "first_two_letters": "ママ",
+    "matching_names": [
+      "ママンボウ"
+    ]
+  },
+  {
+    "first_two_letters": "マメ",
+    "matching_names": [
+      "マメバッタ",
+      "マメパト"
+    ]
+  },
+  {
+    "first_two_letters": "マユ",
+    "matching_names": [
+      "マユルド"
+    ]
+  },
+  {
+    "first_two_letters": "マラ",
+    "matching_names": [
+      "マラカッチ"
+    ]
+  },
+  {
+    "first_two_letters": "マリ",
+    "matching_names": [
+      "マリル",
+      "マリルリ"
+    ]
+  },
+  {
+    "first_two_letters": "マル",
+    "matching_names": [
+      "マルノーム",
+      "マルマイン",
+      "マルヤクデ"
+    ]
+  },
+  {
+    "first_two_letters": "マン",
+    "matching_names": [
+      "マンキー",
+      "マンタイン",
+      "マンムー"
+    ]
+  },
+  {
+    "first_two_letters": "ミガ",
+    "matching_names": [
+      "ミガルーサ"
+    ]
+  },
+  {
+    "first_two_letters": "ミカ",
+    "matching_names": [
+      "ミカルゲ"
+    ]
+  },
+  {
+    "first_two_letters": "ミジ",
+    "matching_names": [
+      "ミジュマル"
+    ]
+  },
+  {
+    "first_two_letters": "ミズ",
+    "matching_names": [
+      "ミズゴロウ"
+    ]
+  },
+  {
+    "first_two_letters": "ミツ",
+    "matching_names": [
+      "ミツハニー"
+    ]
+  },
+  {
+    "first_two_letters": "ミニ",
+    "matching_names": [
+      "ミニーブ",
+      "ミニリュウ"
+    ]
+  },
+  {
+    "first_two_letters": "ミネ",
+    "matching_names": [
+      "ミネズミ"
+    ]
+  },
+  {
+    "first_two_letters": "ミノ",
+    "matching_names": [
+      "ミノマダム",
+      "ミノムッチ"
+    ]
+  },
+  {
+    "first_two_letters": "ミブ",
+    "matching_names": [
+      "ミブリム"
+    ]
+  },
+  {
+    "first_two_letters": "ミミ",
+    "matching_names": [
+      "ミミズズ",
+      "ミミッキュ",
+      "ミミロップ",
+      "ミミロル"
+    ]
+  },
+  {
+    "first_two_letters": "ミュ",
+    "matching_names": [
+      "ミュウ",
+      "ミュウツー"
+    ]
+  },
+  {
+    "first_two_letters": "ミラ",
+    "matching_names": [
+      "ミライドン"
+    ]
+  },
+  {
+    "first_two_letters": "ミル",
+    "matching_names": [
+      "ミルタンク",
+      "ミルホッグ"
+    ]
+  },
+  {
+    "first_two_letters": "ミロ",
+    "matching_names": [
+      "ミロカロス"
+    ]
+  },
+  {
+    "first_two_letters": "ムウ",
+    "matching_names": [
+      "ムウマ",
+      "ムウマージ"
+    ]
+  },
+  {
+    "first_two_letters": "ムー",
+    "matching_names": [
+      "ムーランド"
+    ]
+  },
+  {
+    "first_two_letters": "ムク",
+    "matching_names": [
+      "ムクバード",
+      "ムクホーク"
+    ]
+  },
+  {
+    "first_two_letters": "ムゲ",
+    "matching_names": [
+      "ムゲンダイナ"
+    ]
+  },
+  {
+    "first_two_letters": "ムシ",
+    "matching_names": [
+      "ムシャーナ"
+    ]
+  },
+  {
+    "first_two_letters": "ムチ",
+    "matching_names": [
+      "ムチュール"
+    ]
+  },
+  {
+    "first_two_letters": "ムッ",
+    "matching_names": [
+      "ムックル"
+    ]
+  },
+  {
+    "first_two_letters": "ムン",
+    "matching_names": [
+      "ムンナ"
+    ]
+  },
+  {
+    "first_two_letters": "メェ",
+    "matching_names": [
+      "メェークル"
+    ]
+  },
+  {
+    "first_two_letters": "メガ",
+    "matching_names": [
+      "メガニウム",
+      "メガヤンマ"
+    ]
+  },
+  {
+    "first_two_letters": "メグ",
+    "matching_names": [
+      "メグロコ"
+    ]
+  },
+  {
+    "first_two_letters": "メタ",
+    "matching_names": [
+      "メタグロス",
+      "メタモン",
+      "メタング"
+    ]
+  },
+  {
+    "first_two_letters": "メッ",
+    "matching_names": [
+      "メッソン"
+    ]
+  },
+  {
+    "first_two_letters": "メテ",
+    "matching_names": [
+      "メテノ"
+    ]
+  },
+  {
+    "first_two_letters": "メノ",
+    "matching_names": [
+      "メノクラゲ"
+    ]
+  },
+  {
+    "first_two_letters": "メブ",
+    "matching_names": [
+      "メブキジカ"
+    ]
+  },
+  {
+    "first_two_letters": "メラ",
+    "matching_names": [
+      "メラルバ"
+    ]
+  },
+  {
+    "first_two_letters": "メリ",
+    "matching_names": [
+      "メリープ"
+    ]
+  },
+  {
+    "first_two_letters": "メル",
+    "matching_names": [
+      "メルタン",
+      "メルメタル"
+    ]
+  },
+  {
+    "first_two_letters": "メレ",
+    "matching_names": [
+      "メレシー"
+    ]
+  },
+  {
+    "first_two_letters": "メロ",
+    "matching_names": [
+      "メロエッタ"
+    ]
+  },
+  {
+    "first_two_letters": "モウ",
+    "matching_names": [
+      "モウカザル"
+    ]
+  },
+  {
+    "first_two_letters": "モグ",
+    "matching_names": [
+      "モグリュー"
+    ]
+  },
+  {
+    "first_two_letters": "モク",
+    "matching_names": [
+      "モクロー"
+    ]
+  },
+  {
+    "first_two_letters": "モコ",
+    "matching_names": [
+      "モココ"
+    ]
+  },
+  {
+    "first_two_letters": "モジ",
+    "matching_names": [
+      "モジャンボ"
+    ]
+  },
+  {
+    "first_two_letters": "モス",
+    "matching_names": [
+      "モスノウ"
+    ]
+  },
+  {
+    "first_two_letters": "モト",
+    "matching_names": [
+      "モトトカゲ"
+    ]
+  },
+  {
+    "first_two_letters": "モノ",
+    "matching_names": [
+      "モノズ"
+    ]
+  },
+  {
+    "first_two_letters": "モモ",
+    "matching_names": [
+      "モモワロウ"
+    ]
+  },
+  {
+    "first_two_letters": "モル",
+    "matching_names": [
+      "モルフォン",
+      "モルペコ"
+    ]
+  },
+  {
+    "first_two_letters": "モロ",
+    "matching_names": [
+      "モロバレル"
+    ]
+  },
+  {
+    "first_two_letters": "モン",
+    "matching_names": [
+      "モンジャラ",
+      "モンメン"
+    ]
+  },
+  {
+    "first_two_letters": "ヤク",
+    "matching_names": [
+      "ヤクデ"
+    ]
+  },
+  {
+    "first_two_letters": "ヤジ",
+    "matching_names": [
+      "ヤジロン"
+    ]
+  },
+  {
+    "first_two_letters": "ヤト",
+    "matching_names": [
+      "ヤトウモリ"
+    ]
+  },
+  {
+    "first_two_letters": "ヤド",
+    "matching_names": [
+      "ヤドキング",
+      "ヤドラン",
+      "ヤドン"
+    ]
+  },
+  {
+    "first_two_letters": "ヤナ",
+    "matching_names": [
+      "ヤナッキー",
+      "ヤナップ"
+    ]
+  },
+  {
+    "first_two_letters": "ヤバ",
+    "matching_names": [
+      "ヤバソチャ",
+      "ヤバチャ"
+    ]
+  },
+  {
+    "first_two_letters": "ヤブ",
+    "matching_names": [
+      "ヤブクロン"
+    ]
+  },
+  {
+    "first_two_letters": "ヤミ",
+    "matching_names": [
+      "ヤミカラス",
+      "ヤミラミ"
+    ]
+  },
+  {
+    "first_two_letters": "ヤヤ",
+    "matching_names": [
+      "ヤヤコマ"
+    ]
+  },
+  {
+    "first_two_letters": "ヤル",
+    "matching_names": [
+      "ヤルキモノ"
+    ]
+  },
+  {
+    "first_two_letters": "ヤレ",
+    "matching_names": [
+      "ヤレユータン"
+    ]
+  },
+  {
+    "first_two_letters": "ヤン",
+    "matching_names": [
+      "ヤングース",
+      "ヤンチャム",
+      "ヤンヤンマ"
+    ]
+  },
+  {
+    "first_two_letters": "ユキ",
+    "matching_names": [
+      "ユキカブリ",
+      "ユキノオー",
+      "ユキハミ",
+      "ユキメノコ",
+      "ユキワラシ"
+    ]
+  },
+  {
+    "first_two_letters": "ユク",
+    "matching_names": [
+      "ユクシー"
+    ]
+  },
+  {
+    "first_two_letters": "ユニ",
+    "matching_names": [
+      "ユニラン"
+    ]
+  },
+  {
+    "first_two_letters": "ユレ",
+    "matching_names": [
+      "ユレイドル"
+    ]
+  },
+  {
+    "first_two_letters": "ユン",
+    "matching_names": [
+      "ユンゲラー"
+    ]
+  },
+  {
+    "first_two_letters": "ヨー",
+    "matching_names": [
+      "ヨーギラス",
+      "ヨーテリー"
+    ]
+  },
+  {
+    "first_two_letters": "ヨク",
+    "matching_names": [
+      "ヨクバリス"
+    ]
+  },
+  {
+    "first_two_letters": "ヨノ",
+    "matching_names": [
+      "ヨノワール"
+    ]
+  },
+  {
+    "first_two_letters": "ヨマ",
+    "matching_names": [
+      "ヨマワル"
+    ]
+  },
+  {
+    "first_two_letters": "ヨル",
+    "matching_names": [
+      "ヨルノズク"
+    ]
+  },
+  {
+    "first_two_letters": "ヨワ",
+    "matching_names": [
+      "ヨワシ"
+    ]
+  },
+  {
+    "first_two_letters": "ライ",
+    "matching_names": [
+      "ライコウ",
+      "ライチュウ",
+      "ライボルト"
+    ]
+  },
+  {
+    "first_two_letters": "ラウ",
+    "matching_names": [
+      "ラウドボーン"
+    ]
+  },
+  {
+    "first_two_letters": "ラグ",
+    "matching_names": [
+      "ラグラージ"
+    ]
+  },
+  {
+    "first_two_letters": "ラク",
+    "matching_names": [
+      "ラクライ"
+    ]
+  },
+  {
+    "first_two_letters": "ラッ",
+    "matching_names": [
+      "ラッキー",
+      "ラッタ"
+    ]
+  },
+  {
+    "first_two_letters": "ラテ",
+    "matching_names": [
+      "ラティアス",
+      "ラティオス"
+    ]
+  },
+  {
+    "first_two_letters": "ラビ",
+    "matching_names": [
+      "ラビフット"
+    ]
+  },
+  {
+    "first_two_letters": "ラブ",
+    "matching_names": [
+      "ラブカス",
+      "ラブトロス"
+    ]
+  },
+  {
+    "first_two_letters": "ラプ",
+    "matching_names": [
+      "ラプラス"
+    ]
+  },
+  {
+    "first_two_letters": "ラフ",
+    "matching_names": [
+      "ラフレシア"
+    ]
+  },
+  {
+    "first_two_letters": "ラム",
+    "matching_names": [
+      "ラムパルド"
+    ]
+  },
+  {
+    "first_two_letters": "ララ",
+    "matching_names": [
+      "ラランテス"
+    ]
+  },
+  {
+    "first_two_letters": "ラル",
+    "matching_names": [
+      "ラルトス"
+    ]
+  },
+  {
+    "first_two_letters": "ラン",
+    "matching_names": [
+      "ランクルス",
+      "ランターン",
+      "ランドロス",
+      "ランプラー"
+    ]
+  },
+  {
+    "first_two_letters": "リー",
+    "matching_names": [
+      "リーシャン",
+      "リーフィア"
+    ]
+  },
+  {
+    "first_two_letters": "リオ",
+    "matching_names": [
+      "リオル"
+    ]
+  },
+  {
+    "first_two_letters": "リキ",
+    "matching_names": [
+      "リキキリン"
+    ]
+  },
+  {
+    "first_two_letters": "リク",
+    "matching_names": [
+      "リククラゲ"
+    ]
+  },
+  {
+    "first_two_letters": "リグ",
+    "matching_names": [
+      "リグレー"
+    ]
+  },
+  {
+    "first_two_letters": "リザ",
+    "matching_names": [
+      "リザード",
+      "リザードン"
+    ]
+  },
+  {
+    "first_two_letters": "リリ",
+    "matching_names": [
+      "リリーラ"
+    ]
+  },
+  {
+    "first_two_letters": "リン",
+    "matching_names": [
+      "リングマ"
+    ]
+  },
+  {
+    "first_two_letters": "ルー",
+    "matching_names": [
+      "ルージュラ"
+    ]
+  },
+  {
+    "first_two_letters": "ルカ",
+    "matching_names": [
+      "ルカリオ"
+    ]
+  },
+  {
+    "first_two_letters": "ルガ",
+    "matching_names": [
+      "ルガルガン"
+    ]
+  },
+  {
+    "first_two_letters": "ルギ",
+    "matching_names": [
+      "ルギア"
+    ]
+  },
+  {
+    "first_two_letters": "ルク",
+    "matching_names": [
+      "ルクシオ"
+    ]
+  },
+  {
+    "first_two_letters": "ルチ",
+    "matching_names": [
+      "ルチャブル"
+    ]
+  },
+  {
+    "first_two_letters": "ルナ",
+    "matching_names": [
+      "ルナアーラ",
+      "ルナトーン"
+    ]
+  },
+  {
+    "first_two_letters": "ルリ",
+    "matching_names": [
+      "ルリリ"
+    ]
+  },
+  {
+    "first_two_letters": "ルン",
+    "matching_names": [
+      "ルンパッパ"
+    ]
+  },
+  {
+    "first_two_letters": "レア",
+    "matching_names": [
+      "レアコイル"
+    ]
+  },
+  {
+    "first_two_letters": "レイ",
+    "matching_names": [
+      "レイスポス"
+    ]
+  },
+  {
+    "first_two_letters": "レジ",
+    "matching_names": [
+      "レジアイス",
+      "レジエレキ",
+      "レジギガス",
+      "レジスチル",
+      "レジドラゴ",
+      "レジロック"
+    ]
+  },
+  {
+    "first_two_letters": "レシ",
+    "matching_names": [
+      "レシラム"
+    ]
+  },
+  {
+    "first_two_letters": "レッ",
+    "matching_names": [
+      "レックウザ"
+    ]
+  },
+  {
+    "first_two_letters": "レデ",
+    "matching_names": [
+      "レディアン",
+      "レディバ"
+    ]
+  },
+  {
+    "first_two_letters": "レド",
+    "matching_names": [
+      "レドームシ"
+    ]
+  },
+  {
+    "first_two_letters": "レパ",
+    "matching_names": [
+      "レパルダス"
+    ]
+  },
+  {
+    "first_two_letters": "レン",
+    "matching_names": [
+      "レントラー"
+    ]
+  },
+  {
+    "first_two_letters": "ロー",
+    "matching_names": [
+      "ローブシン"
+    ]
+  },
+  {
+    "first_two_letters": "ロコ",
+    "matching_names": [
+      "ロコン"
+    ]
+  },
+  {
+    "first_two_letters": "ロズ",
+    "matching_names": [
+      "ロズレイド"
+    ]
+  },
+  {
+    "first_two_letters": "ロゼ",
+    "matching_names": [
+      "ロゼリア"
+    ]
+  },
+  {
+    "first_two_letters": "ロト",
+    "matching_names": [
+      "ロトム"
+    ]
+  },
+  {
+    "first_two_letters": "ワカ",
+    "matching_names": [
+      "ワカシャモ"
+    ]
+  },
+  {
+    "first_two_letters": "ワシ",
+    "matching_names": [
+      "ワシボン"
+    ]
+  },
+  {
+    "first_two_letters": "ワタ",
+    "matching_names": [
+      "ワタシラガ",
+      "ワタッコ"
+    ]
+  },
+  {
+    "first_two_letters": "ワッ",
+    "matching_names": [
+      "ワッカネズミ"
+    ]
+  },
+  {
+    "first_two_letters": "ワナ",
+    "matching_names": [
+      "ワナイダー"
+    ]
+  },
+  {
+    "first_two_letters": "ワニ",
+    "matching_names": [
+      "ワニノコ"
+    ]
+  },
+  {
+    "first_two_letters": "ワル",
+    "matching_names": [
+      "ワルビアル",
+      "ワルビル"
+    ]
+  },
+  {
+    "first_two_letters": "ワン",
+    "matching_names": [
+      "ワンパチ"
+    ]
+  }
+]
+
+    let currentCardIndex = 0;  // 現在のカードのインデックス
+    let cards;  // すべてのカードの参照
+
+    // カードを作成する関数
+    function createCards() {
+      const container = document.getElementById('cards-container');
+
+      pokemonData.forEach(group => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+
+        const cardInner = document.createElement('div');
+        cardInner.classList.add('card-inner');
+
+        // 表側
+        const cardFront = document.createElement('div');
+        cardFront.classList.add('card-front');
+        cardFront.textContent = group.first_two_letters;
+
+        // 裏側
+        const cardBack = document.createElement('div');
+        cardBack.classList.add('card-back');
+        cardBack.textContent = group.matching_names.join(", ");
+
+        // カードの内側に表裏を追加
+        cardInner.appendChild(cardFront);
+        cardInner.appendChild(cardBack);
+        card.appendChild(cardInner);
+
+        // カードをクリックで反転させる
+        card.addEventListener('click', function() {
+          flipCard(card);
+        });
+
+        // カードをコンテナに追加
+        container.appendChild(card);
+      });
+
+      cards = document.querySelectorAll('.card');  // すべてのカードを取得
+    }
+
+    // カードを反転させる関数
+    function flipCard(card) {
+      card.classList.toggle('is-flipped');
+    }
+
+    // スペースキーで次のカードをめくる関数
+    function flipNextCard() {
+      // 現在のカードの枠線をリセット
+      if (cards[currentCardIndex]) {
+        cards[currentCardIndex].classList.remove('active-card');
+      }
+
+      // 次のカードを反転
+      if (cards[currentCardIndex]) {
+        flipCard(cards[currentCardIndex]);
+        cards[currentCardIndex].classList.add('active-card');  // 枠線を赤に
+      }
+
+      // 次のカードに移動
+      currentCardIndex = (currentCardIndex + 1) % cards.length;
+    }
+
+    // キーボードイベントを監視
+    document.addEventListener('keydown', function(event) {
+      if (event.code === 'Space') {
+        event.preventDefault();  // スクロールなどのデフォルト動作を無効化
+        flipNextCard();
+      }
+    });
+
+    // ページが読み込まれたらカードを作成
+    window.onload = createCards;
+  </script>
+
+</body>
+</html>
