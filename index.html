@@ -4414,7 +4414,7 @@
         // ポケモンの数を表示
         const pokemonCount = document.createElement('div');
         pokemonCount.classList.add('pokemon-count');
-        pokemonCount.textContent = `${group.matching_names.length}匹`;
+        pokemonCount.textContent = group.matching_names.length !== 1 ? `${group.matching_names.length}匹` : '';
 
         // 表側に追加
         cardFront.appendChild(letters);
