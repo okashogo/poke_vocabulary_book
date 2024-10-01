@@ -52,6 +52,7 @@
       height: 100%;
       backface-visibility: hidden;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       border-radius: 10px;
@@ -76,6 +77,11 @@
 
     .active-card {
       border-color: red; /* 直前に触ったカードの枠線の色 */
+    }
+
+    .pokemon-count {
+      font-size: 12px;
+      margin-top: 8px;
     }
   </style>
 </head>
@@ -4400,7 +4406,19 @@
         // 表側
         const cardFront = document.createElement('div');
         cardFront.classList.add('card-front');
-        cardFront.textContent = group.first_two_letters;
+
+        // 最初の二文字を表示
+        const letters = document.createElement('div');
+        letters.textContent = group.first_two_letters;
+
+        // ポケモンの数を表示
+        const pokemonCount = document.createElement('div');
+        pokemonCount.classList.add('pokemon-count');
+        pokemonCount.textContent = `${group.matching_names.length}匹`;
+
+        // 表側に追加
+        cardFront.appendChild(letters);
+        cardFront.appendChild(pokemonCount);
 
         // 裏側
         const cardBack = document.createElement('div');
@@ -4456,7 +4474,6 @@
 
     // ページが読み込まれたらカードを作成
     window.onload = createCards;
-    
   </script>
 
 </body>
