@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>ポケモン単語帳</title>
   <style>
     body {
@@ -4529,7 +4530,18 @@
 
 
     // ページが読み込まれたらツリーを作成
-    window.onload = createTree;
+    window.onload = function() {
+      createTree();
+      
+      // 最初のグループを自動的に開く
+      const firstTreeNode = document.querySelector('.tree-node');
+      const firstGroup = pokemonData[0];
+      const firstGroupList = firstTreeNode.querySelector('.pokemon-list');
+      firstTreeNode.classList.remove('collapsed');
+      firstTreeNode.classList.add('expanded');
+      
+      resetGroupState(firstGroup, firstGroupList);
+    };
 
     // 次へ・一文字ボタンのイベントハンドラ
     document.getElementById('next-button').addEventListener('click', revealNextPokemon);
